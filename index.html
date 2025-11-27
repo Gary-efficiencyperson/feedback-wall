@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學員回饋紀錄牆</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- html-to-image Library for Screenshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <style>
+        /* 自定義捲動行為平滑 */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* 隱藏檔案輸入框 */
+        .hidden-input {
+            display: none;
+        }
+        /* 避免 Modal 彈出時背景捲動 */
+        body.modal-open {
+            overflow: hidden;
+        }
+        /* 電視牆模式下的卡片內容捲軸 */
+        .tv-card-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .tv-card-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .tv-card-content::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-800">
+
+    <!-- 導覽列 -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-40 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="scrollToSection('hero-section')">
+                    <div class="bg-indigo-600 p-1.5 rounded-lg text-white">
+                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                        FeedbackWall
+                    </span>
+                </div>
+                <div class="flex gap-1 sm:gap-6 text-sm font-medium text-slate-600 items-center">
+                    <button onclick="scrollToSection('form-section')" class="hover:text-indigo-600 px-3 py-2 rounded-md transition hover:bg-slate-50">新增回饋</button>
+                    <button onclick="scrollToSection('wall-section')" class="hover:text-indigo-600 px-3 py-2 rounded-md transition hover:bg-slate-50">回饋牆</button>
+                    <!-- 使用說明按鈕 -->
+                    <button onclick="openHelpModal()" class="text-slate-500 hover:text-indigo-600 px-2 py-2 rounded-full hover:bg-slate-100 transition" title="使用說明">
+                        <i data-lucide="circle-help" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero-section" class="pt-32 pb-16 px-4 bg-gradient-to-b from-slate-50 to-white">
+        <div class="max-w-4xl mx-auto text-center space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-sm font-medium">
+                <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                <span>學員心聲大公開</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight">
+                聆聽每一份<span class="text-indigo-600">真實的回饋</span>
+            </h1>
+            <p class="text-lg text-slate-500 max-w-2xl mx-auto">
+                這裡紀錄了所有學員的寶貴意見。您的回饋是我們進步的最大動力，歡迎寫下您的想法。
+            </p>
+            
+            <!-- 數據看板 -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto mt-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
+                    <span id="stat-total" class="text-4xl font-bold text-indigo-600">0</span>
+                    <span class="text-sm text-slate-500 mt-1 font-medium">累積回饋數</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
+                    <span class="text-4xl font-bold text-amber-500 flex items-center gap-1">
+                        <span id="stat-avg">0.0</span> <i data-lucide="star" class="w-6 h-6 fill-amber-400 text-amber-400"></i>
+                    </span>
+                    <span class="text-sm text-slate-500 mt-1 font-medium">平均滿意度</span>
+                </div>
+                 <div class="hidden md:flex bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex-col items-center justify-center">
+                   <button onclick="scrollToSection('form-section')" class="flex items-center gap-2 text-indigo-600 font-bold hover:underline">
+                     立即填寫 <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                   </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Form Section -->
+    <section id="form-section" class="py-16 px-4 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-slate-800">分享您的看法</h2>
+                <p class="text-slate-500 mt-2">簡單幾步，輕鬆建立一張回饋卡片</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                <div class="bg-slate-900 px-8 py-4">
+                   <div class="flex items-center gap-2 text-white">
+                     <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                     <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                     <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                     <span class="ml-2 text-sm font-mono opacity-80">New_Feedback.exe</span>
+                   </div>
+                </div>
+                
+                <form id="feedback-form" class="p-8 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                                <i data-lucide="user" class="w-4 h-4 text-indigo-500"></i> 學員姓名
+                            </label>
+                            <input type="text" id="input-name" placeholder="例如：王小明 (預設匿名)"
+                                class="w-full px-4 py-3 rounded-xl bg-slate-50 border-0 focus:ring-2 focus:ring-indigo-500 transition outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                                <i data-lucide="book-open" class="w-4 h-4 text-indigo-500"></i> 課程/活動
+                            </label>
+                            <input type="text" id="input-course" placeholder="例如：React 前端開發"
+                                class="w-full px-4 py-3 rounded-xl bg-slate-50 border-0 focus:ring-2 focus:ring-indigo-500 transition outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">滿意度評分</label>
+                        <div class="flex gap-2 items-center bg-slate-50 p-3 rounded-xl inline-flex">
+                            <div id="rating-stars" class="flex gap-1">
+                                <!-- 星星由 JS 生成 -->
+                            </div>
+                            <span id="rating-text" class="ml-3 text-sm font-bold text-slate-500">5 分</span>
+                        </div>
+                        <input type="hidden" id="input-rating" value="5">
+                    </div>
+
+                    <!-- 新增回饋主題/提問欄位 -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="help-circle" class="w-4 h-4 text-indigo-500"></i> 回饋主題 / 提問 <span class="text-slate-400 font-normal ml-1">(選填)</span>
+                        </label>
+                        <input type="text" id="input-topic" placeholder="例如：對課程進度的疑問，或是想深入了解的主題..."
+                            class="w-full px-4 py-3 rounded-xl bg-slate-50 border-0 focus:ring-2 focus:ring-indigo-500 transition outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">回饋內容 <span class="text-red-500">*</span></label>
+                        <textarea id="input-comment" rows="4" placeholder="請寫下您的建議或心得..."
+                            class="w-full px-4 py-3 rounded-xl bg-slate-50 border-0 focus:ring-2 focus:ring-indigo-500 transition resize-none outline-none" required></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition flex justify-center items-center gap-2 text-lg">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            發布到回饋牆
+                        </button>
+                    </div>
+                </form>
+
+                <!-- 工具列 -->
+                <div class="bg-slate-50 border-t border-slate-100 p-4 flex flex-wrap gap-4 justify-center items-center text-sm">
+                    <!-- 編碼選擇 -->
+                    <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-200">
+                       <span class="text-xs text-slate-400">CSV編碼</span>
+                       <select id="encoding-select" class="text-xs bg-transparent text-slate-700 outline-none font-medium cursor-pointer">
+                         <option value="UTF-8">UTF-8</option>
+                         <option value="Big5">Big5</option>
+                       </select>
+                    </div>
+                    
+                    <!-- 覆蓋選項 -->
+                    <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-200 hover:border-indigo-300 transition-colors">
+                        <input type="checkbox" id="overwrite-import" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300 cursor-pointer">
+                        <label for="overwrite-import" class="text-xs text-slate-600 cursor-pointer select-none font-medium">匯入時清空</label>
+                    </div>
+
+                    <!-- 去識別化選項 -->
+                    <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-200 hover:border-indigo-300 transition-colors">
+                        <input type="checkbox" id="mask-import" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300 cursor-pointer">
+                        <label for="mask-import" class="text-xs text-slate-600 cursor-pointer select-none font-medium" title="例如：王小明 -> 王*明">去識別化</label>
+                    </div>
+                    
+                    <input type="file" id="file-input" accept=".csv,.txt,.json" class="hidden-input" onchange="handleFileUpload(this)">
+                    <button onclick="document.getElementById('file-input').click()" class="text-slate-600 hover:text-indigo-600 font-medium px-2 py-1 flex items-center gap-1 transition border border-slate-200 rounded bg-white">
+                       <i data-lucide="upload" class="w-3.5 h-3.5"></i> 匯入
+                    </button>
+                    
+                    <!-- 下載工具 -->
+                    <div class="w-px h-4 bg-slate-300 mx-1"></div>
+                    <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-200">
+                        <span class="text-xs text-slate-400">格式</span>
+                        <select id="download-format" class="text-xs bg-transparent text-slate-700 outline-none font-medium cursor-pointer">
+                            <option value="png">PNG</option>
+                            <option value="jpeg">JPG</option>
+                            <option value="svg">SVG</option>
+                        </select>
+                    </div>
+                    <button onclick="downloadWall()" class="text-slate-600 hover:text-indigo-600 font-medium px-2 py-1 flex items-center gap-1 transition border border-slate-200 rounded bg-white">
+                        <i data-lucide="image-down" class="w-3.5 h-3.5"></i> 下載圖片
+                    </button>
+
+                    <div class="w-px h-4 bg-slate-300 mx-1"></div>
+                    <button onclick="generateDemoData()" class="text-slate-600 hover:text-indigo-600 font-medium px-2 py-1 flex items-center gap-1 transition">
+                       <i data-lucide="download" class="w-3.5 h-3.5"></i> 範例
+                    </button>
+                    <button onclick="confirmClearAll()" class="text-slate-400 hover:text-red-500 font-medium px-2 py-1 flex items-center gap-1 transition">
+                       <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 清空
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wall Section -->
+    <section id="wall-section" class="py-16 px-4 bg-slate-50 min-h-[600px]">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-8 gap-4 border-b border-slate-200 pb-4">
+                 <div>
+                   <h2 class="text-3xl font-bold text-slate-800">學員回饋牆</h2>
+                   <p class="text-slate-500 mt-1">目前共有 <span id="wall-count">0</span> 則回饋</p>
+                 </div>
+                 <div class="flex bg-white rounded-lg shadow-sm p-1 border border-slate-200" id="wall-controls">
+                  <button onclick="setViewMode('masonry')" id="btn-masonry"
+                    class="flex items-center gap-2 px-3 py-2 rounded-md transition bg-indigo-50 text-indigo-700 font-medium">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i> 瀑布流
+                  </button>
+                  <button onclick="setViewMode('list')" id="btn-list"
+                    class="flex items-center gap-2 px-3 py-2 rounded-md transition text-slate-500 hover:bg-slate-50">
+                    <i data-lucide="list" class="w-4 h-4"></i> 列表
+                  </button>
+                  <button onclick="openTVWall()" id="btn-tv"
+                    class="flex items-center gap-2 px-3 py-2 rounded-md transition text-slate-500 hover:bg-slate-50 hover:text-indigo-600"
+                    title="全螢幕展示所有回饋，不需捲動">
+                    <i data-lucide="monitor" class="w-4 h-4"></i> 電視牆
+                  </button>
+                </div>
+            </div>
+
+            <div id="empty-state" class="hidden flex flex-col items-center justify-center py-24 text-slate-400">
+                <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                    <i data-lucide="quote" class="w-10 h-10 opacity-30"></i>
+                </div>
+                <p class="text-xl font-medium text-slate-600">目前還沒有回饋資料</p>
+                <p class="mt-2">成為第一個分享的人吧！</p>
+                <button onclick="scrollToSection('form-section')" class="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition shadow-lg">
+                    前往填寫
+                </button>
+            </div>
+
+            <div id="feedback-container" class="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
+                <!-- 回饋卡片將在此生成 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-center items-center gap-2 mb-4">
+                <i data-lucide="message-square" class="w-6 h-6 text-indigo-500"></i>
+                <span class="text-xl font-bold text-white">FeedbackWall</span>
+            </div>
+            <p class="text-sm opacity-60">© <span id="year"></span> Student Feedback Wall. Designed for better learning.</p>
+        </div>
+    </footer>
+
+    <!-- TV Wall Overlay (全螢幕展示 - 智慧網格版) -->
+    <div id="tv-wall-overlay" class="fixed inset-0 z-[60] bg-slate-100 hidden flex flex-col">
+        <!-- TV Wall Header -->
+        <div class="bg-white px-6 py-3 shadow-sm flex justify-between items-center z-10 border-b border-slate-200" id="tv-header">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-1.5 rounded-lg text-white">
+                    <i data-lucide="monitor" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 leading-none">即時回饋展示</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">顯示全部內容 (自動調整版面)</p>
+                </div>
+            </div>
+            <!-- 電視牆 Header 的右側操作區 (新增下載按鈕) -->
+            <div class="flex items-center gap-2" id="tv-header-actions">
+                <button onclick="downloadWall()" class="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition" title="下載畫面 (格式依主畫面設定)">
+                    <i data-lucide="image-down" class="w-6 h-6"></i>
+                </button>
+                <div class="w-px h-4 bg-slate-300 mx-1"></div>
+                <button onclick="closeTVWall()" class="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition" title="離開 (Esc)">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- TV Wall Content -->
+        <div id="tv-wall-grid" class="flex-1 p-4 overflow-hidden grid gap-4 bg-slate-50/50">
+            <!-- 這裡會由 JS 動態填入 -->
+        </div>
+    </div>
+
+    <!-- Help Modal (使用說明) -->
+    <div id="help-modal" class="fixed inset-0 z-[70] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0" id="help-modal-backdrop"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full max-w-lg opacity-0 scale-95" id="help-modal-panel">
+                    <!-- Header -->
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2 text-indigo-600 font-bold text-lg">
+                            <i data-lucide="book-open" class="w-5 h-5"></i>
+                            系統使用說明
+                        </div>
+                        <button onclick="closeHelpModal()" class="text-slate-400 hover:text-slate-600 transition">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="p-6 space-y-6 text-slate-600 text-sm leading-relaxed">
+                        
+                        <!-- Section 1 -->
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <span class="bg-indigo-100 text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
+                                快速開始
+                            </h4>
+                            <p class="pl-8">直接在上方表單填寫學員姓名、課程名稱、選擇評分與輸入心得，點擊「發布到回饋牆」即可建立卡片。</p>
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <span class="bg-indigo-100 text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
+                                檢視模式
+                            </h4>
+                            <ul class="pl-8 list-disc space-y-1 marker:text-indigo-300">
+                                <li><strong>瀑布流 (Masonry)</strong>：最美觀的展示方式，適合在大螢幕瀏覽。</li>
+                                <li><strong>列表 (List)</strong>：適合逐條詳細閱讀長篇內容。</li>
+                                <li><strong>電視牆 (TV Wall)</strong>：自動計算格數填滿畫面，並依字數調整框格大小，不需捲動，適合投影使用 (按 <kbd class="bg-slate-100 px-1 rounded border border-slate-300 font-mono text-xs">Esc</kbd> 離開)。</li>
+                            </ul>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <span class="bg-indigo-100 text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span>
+                                資料管理
+                            </h4>
+                            <ul class="pl-8 list-disc space-y-1 marker:text-indigo-300">
+                                <li><strong>匯入功能</strong>：支援 .csv 或 .json 檔案。若文字出現亂碼，請在下方工具列切換編碼 (UTF-8 / Big5)。</li>
+                                <li><strong>下載圖片</strong>：支援將牆面下載為 PNG、JPG 或 SVG 圖片。</li>
+                                <li><strong>清空重置</strong>：勾選「匯入時清空舊資料」可完全覆蓋；或使用「清空」按鈕刪除所有資料。</li>
+                                <li><strong>自動保存</strong>：所有資料皆儲存在瀏覽器中，重新整理或關閉分頁不會消失。</li>
+                            </ul>
+                        </div>
+
+                        <!-- Section 4: Import Rules -->
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <span class="bg-indigo-100 text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">4</span>
+                                匯入欄位判斷規則
+                            </h4>
+                            <p class="pl-8 mb-2">系統會自動辨識 CSV/JSON 檔案中的標題（不分大小寫），支援以下關鍵字：</p>
+                            <ul class="pl-8 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <li><span class="text-indigo-600 font-bold">姓名</span>：name, 姓名, 學員, user, who</li>
+                                <li><span class="text-indigo-600 font-bold">課程</span>：course, 課程, 活動, class, subject, title</li>
+                                <li><span class="text-indigo-600 font-bold">評分</span>：rating, 評分, 分數, 滿意度, score, star</li>
+                                <li><span class="text-indigo-600 font-bold">主題</span>：topic, subject, question, 主題, 標題, 提問, 問題</li>
+                                <li><span class="text-indigo-600 font-bold">內容</span>：comment, 回饋, 內容, 心得, 意見, 建議, feedback</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="bg-slate-50 px-6 py-4 flex justify-end">
+                        <button onclick="closeHelpModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm">
+                            了解，開始使用
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal (Generic Alert) -->
+    <div id="custom-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 w-full max-w-sm opacity-0 scale-95" id="modal-panel">
+                    <div class="bg-white p-6">
+                        <div class="flex items-center gap-3 mb-4 text-slate-800">
+                            <div id="modal-icon-bg" class="p-3 rounded-full bg-indigo-50 text-indigo-500">
+                                <i id="modal-icon" data-lucide="message-square" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold" id="modal-title">標題</h3>
+                        </div>
+                        <p class="text-slate-600 mb-8 leading-relaxed whitespace-pre-line px-1" id="modal-message">訊息內容</p>
+                        <div class="flex gap-3 justify-end">
+                            <button type="button" id="modal-cancel" class="px-5 py-2.5 text-slate-600 hover:bg-slate-50 rounded-xl font-medium transition">取消</button>
+                            <button type="button" id="modal-confirm" class="px-5 py-2.5 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 bg-indigo-600 hover:bg-indigo-700">確認</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 變數與狀態 ---
+        const CARD_COLORS = [
+            'bg-pink-50 border-pink-100 text-pink-900',
+            'bg-blue-50 border-blue-100 text-blue-900',
+            'bg-green-50 border-green-100 text-green-900',
+            'bg-purple-50 border-purple-100 text-purple-900',
+            'bg-yellow-50 border-yellow-100 text-yellow-900',
+            'bg-orange-50 border-orange-100 text-orange-900',
+            'bg-teal-50 border-teal-100 text-teal-900',
+            'bg-indigo-50 border-indigo-100 text-indigo-900',
+        ];
+        
+        let feedbacks = [];
+        let viewMode = 'masonry';
+        let currentRating = 5;
+        let confirmCallback = null;
+
+        // --- 初始化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // 載入資料
+            const savedData = localStorage.getItem('student_feedbacks');
+            if (savedData) {
+                feedbacks = JSON.parse(savedData);
+            }
+            
+            // 設置年份
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            // 渲染介面
+            renderRatingStars();
+            renderFeedbacks();
+            lucide.createIcons();
+
+            // 表單提交事件
+            document.getElementById('feedback-form').addEventListener('submit', handleSubmit);
+            
+            // 監聽評分點擊 (事件委派)
+            document.getElementById('rating-stars').addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (btn) {
+                    currentRating = parseInt(btn.dataset.rating);
+                    document.getElementById('input-rating').value = currentRating;
+                    renderRatingStars();
+                }
+            });
+
+            // 監聽鍵盤事件 (Esc 關閉電視牆)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const tvOverlay = document.getElementById('tv-wall-overlay');
+                    if (!tvOverlay.classList.contains('hidden')) {
+                        closeTVWall();
+                    }
+                    // 關閉幫助視窗
+                    const helpModal = document.getElementById('help-modal');
+                    if (!helpModal.classList.contains('hidden')) {
+                        closeHelpModal();
+                    }
+                }
+            });
+        });
+
+        // --- 核心功能 ---
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('input-name').value.trim();
+            const course = document.getElementById('input-course').value.trim();
+            const topic = document.getElementById('input-topic').value.trim();
+            const comment = document.getElementById('input-comment').value.trim();
+            
+            if (!comment) return;
+
+            const newFeedback = {
+                id: Date.now(),
+                name: name || '匿名',
+                course: course || '',
+                topic: topic || '',
+                rating: currentRating,
+                comment: comment,
+                date: new Date().toLocaleDateString('zh-TW'),
+                color: CARD_COLORS[Math.floor(Math.random() * CARD_COLORS.length)]
+            };
+
+            feedbacks.unshift(newFeedback); // 加到最前面
+            saveData();
+            renderFeedbacks();
+            
+            // 重置表單
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-course').value = '';
+            document.getElementById('input-topic').value = '';
+            document.getElementById('input-comment').value = '';
+            currentRating = 5;
+            renderRatingStars();
+
+            // 滑動到牆面
+            scrollToSection('wall-section');
+        }
+
+        function deleteFeedback(id) {
+            showModal({
+                title: '刪除回饋',
+                message: '確定要刪除這則回饋嗎？',
+                isDanger: true,
+                onConfirm: () => {
+                    feedbacks = feedbacks.filter(item => item.id !== id);
+                    saveData();
+                    renderFeedbacks();
+                    closeModal();
+                }
+            });
+        }
+
+        function confirmClearAll() {
+            showModal({
+                title: '清空所有資料',
+                message: '確定要清空所有回饋牆的資料嗎？此動作無法復原。',
+                isDanger: true,
+                onConfirm: () => {
+                    feedbacks = [];
+                    saveData();
+                    renderFeedbacks();
+                    closeModal();
+                }
+            });
+        }
+
+        function saveData() {
+            localStorage.setItem('student_feedbacks', JSON.stringify(feedbacks));
+            updateStats();
+        }
+
+        function generateDemoData() {
+            const demoData = [
+                { id: 1, name: '王小明', course: 'React 基礎入門', topic: '學習心得', rating: 5, comment: '老師講解非常清晰，原本不懂的 Hooks 觀念現在都通了！實作範例也很有幫助。這是我上過最棒的前端課程之一，希望能有進階版！', date: '2023/11/15', color: CARD_COLORS[0] },
+                { id: 2, name: '李美華', course: 'UI/UX 設計思考', topic: '課程建議', rating: 4, comment: '課程內容很紮實。', date: '2023/11/16', color: CARD_COLORS[1] },
+                { id: 3, name: '陳建志', course: 'Python 資料分析', topic: '', rating: 5, comment: '從零開始教起，連我這個文組生都能聽得懂，強烈推薦！資料視覺化的部分特別精彩，讓我對數據分析產生了濃厚的興趣。', date: '2023/11/18', color: CARD_COLORS[2] },
+                { id: 4, name: '匿名', course: '溝通與談判技巧', topic: '講師互動', rating: 5, comment: '講師的互動方式很棒。', date: '2023/11/20', color: CARD_COLORS[4] },
+                { id: 5, name: '林雅婷', course: '商業簡報術', topic: '關於時間控制', rating: 3, comment: '內容不錯，但時間控制可以再加強。', date: '2023/11/21', color: CARD_COLORS[3] },
+                { id: 6, name: '張偉哲', course: '專案管理 PMP', topic: '考試準備', rating: 5, comment: '非常實用的課程，講師分享了很多實戰經驗，不只是死背理論。對於考證照非常有幫助，講義整理得也很詳細。', date: '2023/11/22', color: CARD_COLORS[5] },
+            ];
+            // 避免 ID 衝突，重新生成 ID
+            const newDemoData = demoData.map((d, index) => ({...d, id: Date.now() + index}));
+            feedbacks = [...newDemoData, ...feedbacks];
+            saveData();
+            renderFeedbacks();
+            scrollToSection('wall-section');
+        }
+
+        // --- 下載功能 ---
+        function downloadWall() {
+            const format = document.getElementById('download-format').value;
+            const isTvOpen = !document.getElementById('tv-wall-overlay').classList.contains('hidden');
+            const targetId = isTvOpen ? 'tv-wall-overlay' : 'wall-section';
+            const nodeToCapture = document.getElementById(targetId);
+            
+            // 隱藏 UI 元件
+            let elementsToHide = [];
+            if (isTvOpen) {
+                // 隱藏電視牆 Header 的操作按鈕區
+                const headerActions = document.getElementById('tv-header-actions');
+                if(headerActions) elementsToHide.push(headerActions);
+            } else {
+                // 隱藏主畫面的控制按鈕
+                const controls = document.getElementById('wall-controls');
+                if(controls) elementsToHide.push(controls);
+                // 隱藏卡片上的刪除按鈕 (雖然它們預設是透明的，但以防萬一)
+                const deleteBtns = nodeToCapture.querySelectorAll('button[title="刪除"]');
+                deleteBtns.forEach(b => elementsToHide.push(b));
+            }
+
+            elementsToHide.forEach(el => el.style.display = 'none');
+
+            const filename = `feedback_wall_${new Date().getTime()}.${format}`;
+            const options = {
+                backgroundColor: isTvOpen ? '#f8fafc' : '#ffffff',
+                pixelRatio: 2, // 提高清晰度
+            };
+
+            let promise;
+            if (format === 'png') promise = htmlToImage.toPng(nodeToCapture, options);
+            else if (format === 'jpeg') promise = htmlToImage.toJpeg(nodeToCapture, options);
+            else if (format === 'svg') promise = htmlToImage.toSvg(nodeToCapture, options);
+
+            promise.then(function (dataUrl) {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = dataUrl;
+                link.click();
+                // 恢復 UI
+                elementsToHide.forEach(el => el.style.display = '');
+            })
+            .catch(function (error) {
+                console.error('Download error:', error);
+                alert('下載失敗，請稍後再試');
+                elementsToHide.forEach(el => el.style.display = '');
+            });
+        }
+
+        // --- 渲染邏輯 ---
+
+        function renderRatingStars() {
+            const container = document.getElementById('rating-stars');
+            container.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const isActive = currentRating >= i;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `p-1 transition hover:scale-110 ${isActive ? 'text-amber-400' : 'text-slate-300'}`;
+                btn.dataset.rating = i;
+                btn.innerHTML = `<i data-lucide="star" class="w-8 h-8 ${isActive ? 'fill-current' : ''}"></i>`;
+                container.appendChild(btn);
+            }
+            document.getElementById('rating-text').textContent = `${currentRating} 分`;
+            lucide.createIcons();
+        }
+
+        function renderFeedbacks() {
+            const container = document.getElementById('feedback-container');
+            const emptyState = document.getElementById('empty-state');
+            const wallCount = document.getElementById('wall-count');
+
+            // 更新統計
+            updateStats();
+            wallCount.textContent = feedbacks.length;
+
+            if (feedbacks.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            // 根據 viewMode 設定容器 class
+            if (viewMode === 'masonry') {
+                container.className = "columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6";
+            } else {
+                container.className = "space-y-4 max-w-4xl mx-auto";
+            }
+
+            container.innerHTML = feedbacks.map(item => {
+                const layoutClass = viewMode === 'masonry' 
+                    ? 'bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 p-6 flex flex-col hover:-translate-y-1'
+                    : 'bg-white rounded-xl shadow-sm hover:shadow-md border border-slate-100 p-6 flex flex-col md:flex-row gap-6 items-start';
+
+                const quoteDecor = viewMode === 'list' ? '' : 
+                    `<div class="absolute top-4 right-4 text-slate-100 pointer-events-none -z-0">
+                        <i data-lucide="quote" class="w-20 h-20 transform rotate-12 opacity-40"></i>
+                    </div>`;
+
+                // 提取色系名稱
+                const colorMatch = item.color.match(/bg-([a-z]+)-/);
+                const colorName = colorMatch ? colorMatch[1] : 'slate';
+
+                return `
+                <div class="relative group transition-all duration-300 break-inside-avoid ${layoutClass}">
+                    ${quoteDecor}
+                    
+                    <button onclick="deleteFeedback(${item.id})" class="absolute top-2 right-2 p-2 bg-slate-100 hover:bg-red-500 hover:text-white rounded-full opacity-0 group-hover:opacity-100 transition text-slate-400 z-10" title="刪除">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+
+                    <div class="z-10 w-full">
+                        <!-- Header: Avatar + Name (No Stars) -->
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shadow-inner ${item.color} flex-shrink-0">
+                                ${item.name.charAt(0)}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-bold text-lg text-slate-800 leading-tight truncate">${escapeHtml(item.name)}</h3>
+                                ${item.course ? `
+                                <div class="flex items-center mt-1 w-full">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 truncate flex-1" title="${escapeHtml(item.course)}">${escapeHtml(item.course)}</span>
+                                </div>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            ${item.topic ? `<h4 class="font-bold text-slate-800 mb-1 break-words">${escapeHtml(item.topic)}</h4>` : ''}
+                            <p class="text-slate-600 leading-relaxed whitespace-pre-wrap font-medium">${escapeHtml(item.comment)}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // --- 電視牆 (TV Wall) 功能 ---
+
+        function openTVWall() {
+            const overlay = document.getElementById('tv-wall-overlay');
+            const container = document.getElementById('tv-wall-grid');
+            
+            overlay.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            
+            const count = feedbacks.length;
+            if (count === 0) {
+                container.innerHTML = '<div class="flex items-center justify-center h-full text-slate-400">尚無資料</div>';
+                return;
+            }
+
+            // 1. 計算權重與樣式
+            const itemsWithDimensions = feedbacks.map(item => {
+                const len = item.comment.length;
+                let colSpan = 1;
+                let rowSpan = 1;
+                
+                // 統一字體樣式
+                let fontSize = 'text-base'; 
+                let justifyClass = 'justify-start';
+                let textAlign = 'text-left';
+                let fontColor = 'text-slate-700';
+
+                // 依字數決定卡片大小
+                if (len < 80) {
+                    // 標準長度
+                    colSpan = 1;
+                    rowSpan = 1;
+                } else if (len < 150) {
+                    // 中長度：變寬
+                    colSpan = 2;
+                    rowSpan = 1;
+                } else {
+                    // 超長：變大塊 (2x2)
+                    colSpan = 2;
+                    rowSpan = 2;
+                }
+                
+                // 課程名稱字體大小智慧調整 (寬鬆版)
+                let courseClass = "text-xs";
+                if (item.course) {
+                    const cLen = item.course.length;
+                    if (cLen > 45) courseClass = "text-[9px]";
+                    else if (cLen > 35) courseClass = "text-[10px]";
+                    else if (cLen > 25) courseClass = "text-[11px]";
+                }
+
+                // 提取色系名稱 (假設格式如 bg-pink-50)
+                const colorMatch = item.color.match(/bg-([a-z]+)-/);
+                const colorName = colorMatch ? colorMatch[1] : 'slate';
+
+                return { 
+                    ...item, 
+                    colSpan, 
+                    rowSpan, 
+                    weight: colSpan * rowSpan,
+                    fontSize,
+                    justifyClass,
+                    textAlign,
+                    fontColor,
+                    courseClass,
+                    colorName
+                };
+            });
+
+            // 2. 計算總權重
+            const totalWeight = itemsWithDimensions.reduce((sum, item) => sum + item.weight, 0);
+
+            // 3. 計算最佳網格維度
+            let rows = Math.round(Math.sqrt(totalWeight / 1.77)); 
+            if (rows < 2) rows = 2;
+            let cols = Math.ceil(totalWeight / rows);
+            
+            if (itemsWithDimensions.some(i => i.colSpan > 1) && cols < 2) cols = 2;
+
+            // 4. 設定 CSS Grid
+            container.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+            container.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
+            container.style.gridAutoFlow = 'dense';
+
+            // 5. 渲染卡片
+            container.innerHTML = itemsWithDimensions.map(item => {
+                const spanStyle = `grid-column: span ${item.colSpan}; grid-row: span ${item.rowSpan};`;
+                
+                // 全新設計的電視牆卡片樣式
+                return `
+                <div style="${spanStyle}" class="relative bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md hover:scale-[1.01] duration-200 border-l-4 border-${item.colorName}-400">
+                    
+                    <!-- 背景裝飾引號 -->
+                    <div class="absolute bottom-[-10px] right-[10px] pointer-events-none z-0">
+                        <i data-lucide="quote" class="w-24 h-24 text-${item.colorName}-100/50 transform rotate-12"></i>
+                    </div>
+
+                    <div class="relative z-10 p-4 flex flex-col h-full">
+                        <!-- Row 1: Header (Avatar & Name) - No Stars -->
+                        <div class="flex justify-between items-start gap-2 mb-2 shrink-0 w-full">
+                            <div class="flex items-center gap-3 min-w-0 w-full">
+                                 <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shadow-sm bg-${item.colorName}-100 text-${item.colorName}-700 shrink-0">
+                                    ${item.name.charAt(0)}
+                                </div>
+                                <h3 class="font-bold text-base text-slate-800 leading-tight truncate w-full">${escapeHtml(item.name)}</h3>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 2: Course Name Badge -->
+                        ${item.course ? `<div class="w-full mb-3 ${item.courseClass} text-${item.colorName}-800 font-medium whitespace-nowrap overflow-hidden text-ellipsis bg-${item.colorName}-50 rounded-full px-2 py-0.5 shrink-0 border border-${item.colorName}-100" title="${escapeHtml(item.course)}">${escapeHtml(item.course)}</div>` : ''}
+                        
+                        <!-- Row 3: Content -->
+                        <div class="flex-1 overflow-y-auto tv-card-content relative flex flex-col justify-start text-left">
+                             ${item.topic ? `<h4 class="font-bold text-slate-800 mb-1 break-words">${escapeHtml(item.topic)}</h4>` : ''}
+                             <p class="${item.fontSize} text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">${escapeHtml(item.comment)}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        function closeTVWall() {
+            const overlay = document.getElementById('tv-wall-overlay');
+            overlay.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        }
+
+        // --- 使用說明 Modal 功能 ---
+        function openHelpModal() {
+            const modal = document.getElementById('help-modal');
+            const backdrop = document.getElementById('help-modal-backdrop');
+            const panel = document.getElementById('help-modal-panel');
+
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                panel.classList.remove('opacity-0', 'scale-95');
+                panel.classList.add('opacity-100', 'scale-100');
+            }, 10);
+        }
+
+        function closeHelpModal() {
+            const modal = document.getElementById('help-modal');
+            const backdrop = document.getElementById('help-modal-backdrop');
+            const panel = document.getElementById('help-modal-panel');
+
+            backdrop.classList.add('opacity-0');
+            panel.classList.remove('opacity-100', 'scale-100');
+            panel.classList.add('opacity-0', 'scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('modal-open');
+            }, 200);
+        }
+
+        // --- Missing Functions Restored ---
+
+        function updateStats() {
+            const total = feedbacks.length;
+            const avg = total > 0 ? (feedbacks.reduce((acc, cur) => acc + cur.rating, 0) / total).toFixed(1) : '0.0';
+            
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-avg').textContent = avg;
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            // 更新按鈕樣式
+            const btnMasonry = document.getElementById('btn-masonry');
+            const btnList = document.getElementById('btn-list');
+            
+            if (mode === 'masonry') {
+                btnMasonry.className = "flex items-center gap-2 px-3 py-2 rounded-md transition bg-indigo-50 text-indigo-700 font-medium";
+                btnList.className = "flex items-center gap-2 px-3 py-2 rounded-md transition text-slate-500 hover:bg-slate-50";
+            } else {
+                btnMasonry.className = "flex items-center gap-2 px-3 py-2 rounded-md transition text-slate-500 hover:bg-slate-50";
+                btnList.className = "flex items-center gap-2 px-3 py-2 rounded-md transition bg-indigo-50 text-indigo-700 font-medium";
+            }
+            renderFeedbacks();
+        }
+
+        // 檢查是否為重複資料
+        const isDuplicate = (newItem, existingItems) => {
+            return existingItems.some(existing => 
+                existing.name === newItem.name &&
+                existing.course === newItem.course &&
+                existing.topic === newItem.topic && // 新增主題比對
+                existing.rating === newItem.rating &&
+                existing.comment === newItem.comment
+            );
+        };
+
+        // 姓名去識別化函式
+        const maskName = (name) => {
+            if (!name || name.length <= 1 || name === '匿名') return name;
+            if (name.length === 2) {
+                return name[0] + '*';
+            }
+            // 3字以上: 保留首尾，中間變*
+            return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
+        };
+
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const encoding = document.getElementById('encoding-select').value;
+            const shouldOverwrite = document.getElementById('overwrite-import').checked; // 取得覆蓋選項
+            const shouldMask = document.getElementById('mask-import').checked; // 取得去識別化選項
+            const reader = new FileReader();
+            reader.readAsText(file, encoding);
+
+            reader.onload = (event) => {
+                try {
+                    let content = event.target.result;
+                    if (content.charCodeAt(0) === 0xFEFF) {
+                        content = content.slice(1);
+                    }
+
+                    let parsedData = [];
+                    if (file.name.endsWith('.json')) {
+                        parsedData = JSON.parse(content);
+                    } else {
+                        parsedData = parseCSV(content);
+                    }
+
+                    const keyMap = {
+                        name: ['name', '姓名', '學員', 'user', 'who'],
+                        course: ['course', '課程', '活動', 'class', 'subject', 'title'],
+                        rating: ['rating', '評分', '分數', '滿意度', 'score', 'star', 'grade'],
+                        topic: ['topic', 'subject', 'question', '主題', '標題', '提問', '問題'], // 新增主題關鍵字
+                        comment: ['comment', '回饋', '內容', '心得', '意見', '建議', 'feedback', 'message', 'text']
+                    };
+
+                    const getValueByFuzzyKey = (obj, keywords) => {
+                        const keys = Object.keys(obj);
+                        const matchedKey = keys.find(key => 
+                            keywords.some(keyword => key.toLowerCase().includes(keyword.toLowerCase()))
+                        );
+                        return matchedKey ? obj[matchedKey] : null;
+                    };
+
+                    const validData = parsedData.map((item, index) => {
+                        const rawName = getValueByFuzzyKey(item, keyMap.name);
+                        const rawCourse = getValueByFuzzyKey(item, keyMap.course);
+                        const rawRating = getValueByFuzzyKey(item, keyMap.rating);
+                        const rawTopic = getValueByFuzzyKey(item, keyMap.topic);
+                        const rawComment = getValueByFuzzyKey(item, keyMap.comment);
+                        
+                        let finalName = rawName || item.name || '匿名';
+                        if (shouldMask) {
+                            finalName = maskName(finalName);
+                        }
+
+                        return {
+                            id: Date.now() + index,
+                            name: finalName,
+                            course: rawCourse || item.course || '',
+                            topic: rawTopic || item.topic || '',
+                            rating: Math.min(5, Math.max(1, parseInt(rawRating || item.rating || 5))) || 5,
+                            comment: rawComment || item.comment || '', 
+                            date: new Date().toLocaleDateString('zh-TW'),
+                            color: CARD_COLORS[Math.floor(Math.random() * CARD_COLORS.length)]
+                        };
+                    }).filter(item => item.comment && item.comment.toString().trim() !== '');
+
+                    if (validData.length > 0) {
+                        if (shouldOverwrite) {
+                            feedbacks = validData; // 覆蓋
+                            saveData();
+                            renderFeedbacks();
+                            showModal({ title: '匯入成功', message: `已清空舊資料，並成功匯入 ${validData.length} 筆新資料！` });
+                        } else {
+                            // 自動去重邏輯
+                            const uniqueData = validData.filter(item => !isDuplicate(item, feedbacks));
+                            
+                            if (uniqueData.length === 0) {
+                                showModal({ title: '重複資料', message: '匯入的資料已全部存在於牆上，系統自動忽略重複項目。' });
+                            } else {
+                                const duplicateCount = validData.length - uniqueData.length;
+                                feedbacks = [...uniqueData, ...feedbacks]; // 附加
+                                saveData();
+                                renderFeedbacks();
+                                let msg = `成功匯入 ${uniqueData.length} 筆資料！`;
+                                if (duplicateCount > 0) {
+                                    msg += `\n(已自動忽略 ${duplicateCount} 筆重複資料)`;
+                                }
+                                showModal({ title: '匯入成功', message: msg });
+                            }
+                        }
+                        scrollToSection('wall-section');
+                    } else {
+                        showModal({ title: '匯入失敗', message: '找不到有效的回饋資料。\n請檢查編碼或欄位名稱。', isDanger: true });
+                    }
+                } catch (error) {
+                    console.error('Import error:', error);
+                    showModal({ title: '錯誤', message: '匯入失敗：檔案讀取錯誤', isDanger: true });
+                }
+                input.value = ''; // Reset input
+            };
+        }
+
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
+            if (lines.length === 0) return [];
+            const firstLine = lines[0].toLowerCase();
+            const keywords = ['name', '姓名', 'course', '課程', 'rating', '評分', 'comment', '回饋', '心得', '內容'];
+            const hasHeader = keywords.some(k => firstLine.includes(k));
+            let headers = ['name', 'course', 'rating', 'comment'];
+            let startIndex = 0;
+            if (hasHeader) {
+                headers = lines[0].split(',').map(h => h.trim());
+                startIndex = 1;
+            }
+            const result = [];
+            for (let i = startIndex; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                let obj = {};
+                if (!hasHeader) {
+                    obj.name = values[0];
+                    obj.course = values[1];
+                    obj.rating = values[2];
+                    obj.comment = values.slice(3).join(',');
+                } else {
+                    headers.forEach((h, index) => {
+                        if (index < values.length) obj[h] = values[index];
+                    });
+                }
+                result.push(obj);
+            }
+            return result;
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showModal({ title, message, isDanger = false, onConfirm = null }) {
+            const modal = document.getElementById('custom-modal');
+            const backdrop = document.getElementById('modal-backdrop');
+            const panel = document.getElementById('modal-panel');
+            
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            
+            const iconBg = document.getElementById('modal-icon-bg');
+            const confirmBtn = document.getElementById('modal-confirm');
+            const cancelBtn = document.getElementById('modal-cancel');
+            const icon = document.getElementById('modal-icon');
+
+            if (isDanger) {
+                iconBg.className = 'p-3 rounded-full bg-red-50 text-red-500';
+                confirmBtn.className = 'px-5 py-2.5 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 bg-red-500 hover:bg-red-600';
+                icon.setAttribute('data-lucide', 'alert-triangle');
+            } else {
+                iconBg.className = 'p-3 rounded-full bg-indigo-50 text-indigo-500';
+                confirmBtn.className = 'px-5 py-2.5 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 bg-indigo-600 hover:bg-indigo-700';
+                icon.setAttribute('data-lucide', title.includes('成功') ? 'check-circle' : 'message-square');
+            }
+            
+            lucide.createIcons();
+
+            confirmCallback = onConfirm;
+            if (!onConfirm) {
+                cancelBtn.classList.add('hidden');
+                confirmBtn.textContent = '關閉';
+                confirmBtn.onclick = closeModal;
+            } else {
+                cancelBtn.classList.remove('hidden');
+                confirmBtn.textContent = '確認';
+                confirmBtn.onclick = onConfirm;
+            }
+            
+            cancelBtn.onclick = closeModal;
+
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            
+            // Animation
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                panel.classList.remove('opacity-0', 'scale-95');
+                panel.classList.add('opacity-100', 'scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('custom-modal');
+            const backdrop = document.getElementById('modal-backdrop');
+            const panel = document.getElementById('modal-panel');
+
+            backdrop.classList.add('opacity-0');
+            panel.classList.remove('opacity-100', 'scale-100');
+            panel.classList.add('opacity-0', 'scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('modal-open');
+            }, 200);
+        }
+
+    </script>
+</body>
+</html>
